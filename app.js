@@ -178,6 +178,13 @@ function init() {
   renderReminders();
   updateHeartProgress();
   
+  // Register PWA Service Worker for offline and background notifications
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('Service Worker registered successfully:', reg.scope))
+      .catch(err => console.error('Service Worker registration failed:', err));
+  }
+  
   // Start the background checker for reminders (every second)
   setInterval(checkReminders, 1000);
 }
@@ -742,13 +749,27 @@ function triggerAlarm(reminder) {
   // 2. Trigger rich Vibration (Alarm cadence: short bursts)
   triggerVibration([200, 100, 200, 100, 300, 150, 500]);
   
-  // 3. Show System Push Notification
+  // 3. Show System Push Notification (via Service Worker to support background display)
   if (Notification.permission === 'granted') {
     const notifyBody = mascotDialogs[state.activeCharacter].alarm.replace('%TEXT%', reminder.text);
-    new Notification("PastelMinder", {
+    const options = {
       body: `【リマインド】${reminder.text}\n${notifyBody}`,
-      icon: 'favicon.ico' // fallback
-    });
+      icon: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/svgs/solid/wand-magic-sparkles.svg',
+      vibrate: [200, 100, 200],
+      tag: reminder.id,
+      requireInteraction: true // keep notification active until user clicks
+    };
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(reg => {
+        reg.showNotification("PastelMinder", options);
+      });
+    } else {
+      new Notification("PastelMinder", {
+        body: options.body,
+        icon: options.icon
+      });
+    }
   }
   
   // 4. Slide Up Alarm Screen Overlay
