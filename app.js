@@ -20,7 +20,8 @@ const state = {
   // Audio state
   audioCtx: null,
   activeAmbientSound: null, // 'rain' | 'waves' | 'forest' | null
-  ambientNodes: {} // references to running synth nodes
+  ambientNodes: {}, // references to running synth nodes
+  keepAliveNode: null // silent audio keep-alive to prevent background sleep
 };
 
 // --- DATA DICTIONARIES (CHARACTER DIALOGS & QUOTES) ---
@@ -254,6 +255,41 @@ function initAudio() {
   }
   if (state.audioCtx.state === 'suspended') {
     state.audioCtx.resume();
+  }
+}
+
+// Silent Audio Keep-Alive to prevent OS suspending JS execution in background
+function startSilentKeepAlive() {
+  if (!state.soundEnabled) return;
+  initAudio();
+  if (state.keepAliveNode) return; // already running
+  
+  const ctx = state.audioCtx;
+  if (!ctx) return;
+  
+  // Create an extremely quiet oscillating signal that keeps context alive in the background
+  const osc = ctx.createOscillator();
+  const gainNode = ctx.createGain();
+  
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(1, ctx.currentTime); // 1Hz sub-audible
+  gainNode.gain.setValueAtTime(0.0001, ctx.currentTime); // sub-audible / silent
+  
+  osc.connect(gainNode);
+  gainNode.connect(ctx.destination);
+  
+  osc.start();
+  state.keepAliveNode = osc;
+  console.log("Background keep-alive active.");
+}
+
+function stopSilentKeepAlive() {
+  if (state.keepAliveNode) {
+    try {
+      state.keepAliveNode.stop();
+    } catch(e) {}
+    state.keepAliveNode = null;
+    console.log("Background keep-alive disabled.");
   }
 }
 
@@ -598,6 +634,9 @@ function updateHeartProgress() {
 // --- REMINDER MANAGEMENT ---
 
 function addReminder(text, dateStr, timeStr) {
+  // Start silent keep-alive on user interaction to secure background CPU slice
+  startSilentKeepAlive();
+
   if (!text.trim()) {
     setMascotSpeech("おっと！覚えておく内容が書かれていないみたいだよ？");
     triggerVibration([100]);
@@ -720,6 +759,14 @@ function escapeHTML(str) {
 let activeTriggeredReminder = null;
 
 function checkReminders() {
+  // Sync background keep-alive status based on active reminders
+  const hasActiveReminders = state.reminders.some(r => !r.completed);
+  if (hasActiveReminders) {
+    startSilentKeepAlive();
+  } else {
+    stopSilentKeepAlive();
+  }
+
   const now = new Date();
   
   // Format current local time key to match YYYY-MM-DD and HH:MM
