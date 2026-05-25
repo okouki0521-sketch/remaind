@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>PastelMinder | かわいいAIパートナーとリマインド</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Outfit:wght@100..900&family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="character-lumina">
+  <div class="app-background"></div>
+  <div class="app-container">
+    
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="header-logo">
+        <span class="logo-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+        <h1>PastelMinder</h1>
+      </div>
+      <button id="btn-sound-toggle" class="icon-button" title="サウンド切り替え">
+        <i class="fa-solid fa-volume-high"></i>
+      </button>
+    </header>
+
+    <!-- MAIN INTERACTIVE MASCOT AREA -->
+    <section class="mascot-section">
+      <div class="speech-bubble-container">
+        <div id="speech-bubble" class="speech-bubble">
+          こんにちは！今日の予定を教えてね。いつでも覚えるよ！🌟
+        </div>
+      </div>
+      
+      <div class="mascot-display">
+        <!-- SVG Mascot: Lumina (Fairy) -->
+        <div id="mascot-lumina" class="mascot-wrapper active">
+          <svg class="mascot-svg" viewBox="0 0 200 200">
+            <!-- Wings (Animated) -->
+            <g class="wings">
+              <path class="wing wing-left" d="M 60,90 C 20,60 10,110 55,115 Z" fill="rgba(216, 191, 216, 0.7)" />
+              <path class="wing wing-right" d="M 140,90 C 180,60 190,110 145,115 Z" fill="rgba(216, 191, 216, 0.7)" />
+            </g>
+            <!-- Halo / Sparkles -->
+            <circle cx="100" cy="50" r="15" fill="none" stroke="rgba(255, 223, 0, 0.8)" stroke-width="3" stroke-dasharray="4 2" class="halo" />
+            <!-- Floating Sparkles -->
+            <circle cx="50" cy="70" r="3" fill="#fff" class="sparkle sp-1" />
+            <circle cx="150" cy="80" r="2" fill="#fff" class="sparkle sp-2" />
+            <circle cx="100" cy="150" r="2" fill="#fff" class="sparkle sp-3" />
+            <!-- Main Body -->
+            <g class="body-group">
+              <!-- Glow -->
+              <circle cx="100" cy="100" r="45" fill="url(#lumina-glow)" class="glow-effect" />
+              <!-- Face / Head (Unified cute pastel ball) -->
+              <circle cx="100" cy="100" r="38" fill="#EADCF7" stroke="#D1BFE8" stroke-width="2" />
+              <!-- Rosy Cheeks -->
+              <circle cx="80" cy="108" r="6" fill="#FFAEC9" opacity="0.8" />
+              <circle cx="120" cy="108" r="6" fill="#FFAEC9" opacity="0.8" />
+              <!-- Eyes (Blinking) -->
+              <g class="eyes">
+                <ellipse cx="82" cy="98" rx="3.5" ry="5" fill="#4B3A5A" class="eye-left" />
+                <circle cx="83.5" cy="96" r="1.2" fill="#fff" class="pupil-left" />
+                
+                <ellipse cx="118" cy="98" rx="3.5" ry="5" fill="#4B3A5A" class="eye-right" />
+                <circle cx="119.5" cy="96" r="1.2" fill="#fff" class="pupil-right" />
+              </g>
+              <!-- Mouth (Smiling) -->
+              <path d="M 96,108 Q 100,113 104,108" fill="none" stroke="#4B3A5A" stroke-width="2.5" stroke-linecap="round" class="mouth" />
+            </g>
+          </svg>
+        </div>
+
+        <!-- SVG Mascot: Mochineko (Cat) -->
+        <div id="mascot-mochineko" class="mascot-wrapper">
+          <svg class="mascot-svg" viewBox="0 0 200 200">
+            <!-- Shadow -->
+            <ellipse cx="100" cy="155" rx="40" ry="8" fill="rgba(0, 0, 0, 0.08)" />
+            <!-- Tail (Wagging) -->
+            <path class="cat-tail" d="M 130,135 Q 165,120 155,100" fill="none" stroke="#FFE9E3" stroke-width="8" stroke-linecap="round" />
+            <g class="body-group">
+              <!-- Ears -->
+              <polygon points="65,72 85,92 58,100" fill="#FFE9E3" stroke="#F7D0C6" stroke-width="2" />
+              <polygon points="69,78 82,91 63,97" fill="#FFAEC9" />
+              
+              <polygon points="135,72 115,92 142,100" fill="#FFE9E3" stroke="#F7D0C6" stroke-width="2" />
+              <polygon points="131,78 118,91 137,97" fill="#FFAEC9" />
+              
+              <!-- Main marshmallow body -->
+              <rect x="60" y="85" width="80" height="70" rx="35" ry="30" fill="#FFE9E3" stroke="#F7D0C6" stroke-width="2" />
+              
+              <!-- Rosy Cheeks -->
+              <circle cx="78" cy="120" r="5" fill="#FFC0CB" opacity="0.9" />
+              <circle cx="122" cy="120" r="5" fill="#FFC0CB" opacity="0.9" />
+              
+              <!-- Eyes (Cat style, blinking) -->
+              <g class="eyes">
+                <path d="M 73,111 Q 78,107 83,111" fill="none" stroke="#5D4B47" stroke-width="3" stroke-linecap="round" class="eye-left" />
+                <path d="M 117,111 Q 122,107 127,111" fill="none" stroke="#5D4B47" stroke-width="3" stroke-linecap="round" class="eye-right" />
+              </g>
+              
+              <!-- Cat Mouth -->
+              <path d="M 96,118 Q 100,121 100,118 Q 100,121 104,118" fill="none" stroke="#5D4B47" stroke-width="2" stroke-linecap="round" />
+              
+              <!-- Cat Whiskers -->
+              <line x1="52" y1="117" x2="42" y2="115" stroke="#F7D0C6" stroke-width="2" stroke-linecap="round" />
+              <line x1="53" y1="123" x2="43" y2="124" stroke="#F7D0C6" stroke-width="2" stroke-linecap="round" />
+              <line x1="148" y1="117" x2="158" y2="115" stroke="#F7D0C6" stroke-width="2" stroke-linecap="round" />
+              <line x1="147" y1="123" x2="157" y2="124" stroke="#F7D0C6" stroke-width="2" stroke-linecap="round" />
+            </g>
+          </svg>
+        </div>
+
+        <!-- SVG Mascot: Robi (Robot) -->
+        <div id="mascot-robi" class="mascot-wrapper">
+          <svg class="mascot-svg" viewBox="0 0 200 200">
+            <!-- Shadow -->
+            <ellipse cx="100" cy="158" rx="30" ry="6" fill="rgba(0, 0, 0, 0.08)" />
+            <!-- Hover thruster glow -->
+            <ellipse cx="100" cy="140" rx="10" ry="4" fill="#A8E6CF" class="thruster-glow" />
+            
+            <g class="body-group">
+              <!-- Antenna -->
+              <line x1="100" y1="75" x2="100" y2="55" stroke="#D1E8E2" stroke-width="4" stroke-linecap="round" />
+              <circle cx="100" cy="52" r="7" fill="#E8F8F5" stroke="#A8E6CF" stroke-width="2" class="antenna-light" />
+              
+              <!-- Ears / Bolts -->
+              <rect x="53" y="93" width="10" height="14" rx="2" fill="#BCD4DE" />
+              <rect x="137" y="93" width="10" height="14" rx="2" fill="#BCD4DE" />
+              
+              <!-- Main Rounded Square Body (Screen) -->
+              <rect x="60" y="75" width="80" height="65" rx="16" fill="#D2E8F1" stroke="#BCD4DE" stroke-width="2.5" />
+              
+              <!-- Inner Dark Screen -->
+              <rect x="68" y="83" width="64" height="42" rx="8" fill="#2E3C42" />
+              
+              <!-- Cheeks -->
+              <circle cx="78" cy="112" r="3.5" fill="#E84A5F" opacity="0.6" />
+              <circle cx="122" cy="112" r="3.5" fill="#E84A5F" opacity="0.6" />
+              
+              <!-- Digital Eyes (Led style, animated) -->
+              <g class="eyes">
+                <circle cx="82" cy="100" r="5" fill="#A8E6CF" class="eye-left" />
+                <circle cx="83" cy="99" r="1.5" fill="#fff" />
+                
+                <circle cx="118" cy="100" r="5" fill="#A8E6CF" class="eye-right" />
+                <circle cx="119" cy="99" r="1.5" fill="#fff" />
+              </g>
+              
+              <!-- Digital Mouth (Wavy line or smile) -->
+              <path d="M 94,112 Q 100,116 106,112" fill="none" stroke="#A8E6CF" stroke-width="2" stroke-linecap="round" class="mouth" />
+            </g>
+          </svg>
+        </div>
+      </div>
+      
+      <div class="mascot-selector">
+        <button id="select-lumina" class="btn-char-select active" data-char="lumina">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> ルミナ
+        </button>
+        <button id="select-mochineko" class="btn-char-select" data-char="mochineko">
+          <i class="fa-solid fa-cat"></i> もちねこ
+        </button>
+        <button id="select-robi" class="btn-char-select" data-char="robi">
+          <i class="fa-solid fa-robot"></i> ロビ
+        </button>
+      </div>
+    </section>
+
+    <!-- APP VIEW PANELS CONTAINER -->
+    <main class="app-main">
+      
+      <!-- PANEL 1: REMINDERS (HOME) -->
+      <section id="panel-reminders" class="app-panel active">
+        <!-- ADD REMINDER FORM -->
+        <div class="glass-card add-card">
+          <div class="form-row">
+            <div class="input-wrapper">
+              <input type="text" id="reminder-text" placeholder="覚えておきたいことは？" maxlength="60" autocomplete="off">
+              <button id="btn-voice" class="voice-button" title="音声で入力">
+                <i class="fa-solid fa-microphone"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="form-row date-time-row">
+            <div class="datetime-input-group">
+              <span class="input-label"><i class="fa-regular fa-calendar"></i></span>
+              <input type="date" id="reminder-date">
+            </div>
+            <div class="datetime-input-group">
+              <span class="input-label"><i class="fa-regular fa-clock"></i></span>
+              <input type="time" id="reminder-time">
+            </div>
+          </div>
+          
+          <!-- QUICK TIME PRESETS -->
+          <div class="quick-presets">
+            <button class="preset-btn" data-time="5"><span>+5分</span></button>
+            <button class="preset-btn" data-time="30"><span>+30分</span></button>
+            <button class="preset-btn" data-time="60"><span>+1時間</span></button>
+            <button class="preset-btn" data-time="tomorrow-9"><span>明日朝9:00</span></button>
+          </div>
+          
+          <button id="btn-add-reminder" class="primary-button">
+            <i class="fa-solid fa-plus"></i> パートナーに覚えてもらう
+          </button>
+        </div>
+        
+        <!-- FILTER TABS & REMINDER LIST -->
+        <div class="reminders-container">
+          <div class="list-header">
+            <h2>おぼえてること</h2>
+            <div class="filter-controls">
+              <button class="filter-tab active" data-filter="active">未完了</button>
+              <button class="filter-tab" data-filter="completed">完了済み</button>
+            </div>
+          </div>
+          
+          <div id="reminders-list" class="reminders-list">
+            <!-- Empty state placeholder -->
+            <div class="empty-state">
+              <div class="empty-icon"><i class="fa-regular fa-note-sticky"></i></div>
+              <p>今は覚えていることはありません。<br>上のフォームから登録してね！</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANEL 2: FOCUS TIMER -->
+      <section id="panel-timer" class="app-panel">
+        <div class="glass-card timer-card">
+          <div class="timer-mascot-speech">
+            「集中タイマーだよ！終わるまで一緒に頑張ろうね！」
+          </div>
+          
+          <div class="timer-display-container">
+            <svg class="timer-progress-svg" viewBox="0 0 200 200">
+              <circle cx="100" cy="100" r="85" class="timer-track" />
+              <circle cx="100" cy="100" r="85" class="timer-progress" />
+            </svg>
+            <div class="timer-time-text">
+              <span id="timer-minutes">25</span>:<span id="timer-seconds">00</span>
+            </div>
+          </div>
+
+          <div class="timer-presets">
+            <button class="timer-preset-btn active" data-duration="25">25分</button>
+            <button class="timer-preset-btn" data-duration="15">15分</button>
+            <button class="timer-preset-btn" data-duration="5">5分</button>
+          </div>
+
+          <div class="timer-controls">
+            <button id="btn-timer-toggle" class="timer-main-btn"><i class="fa-solid fa-play"></i> スタート</button>
+            <button id="btn-timer-reset" class="timer-reset-btn"><i class="fa-solid fa-rotate-left"></i> リセット</button>
+          </div>
+          
+          <!-- AMBIENT SOUNDS IN-TIMER -->
+          <div class="ambient-sound-controls">
+            <h3>🔕 バックグラウンド環境音（シンセ再生）</h3>
+            <div class="ambient-btns">
+              <button class="ambient-btn" data-sound="rain"><i class="fa-solid fa-cloud-showers-heavy"></i> 恵みの雨</button>
+              <button class="ambient-btn" data-sound="waves"><i class="fa-solid fa-water"></i> 静かな波</button>
+              <button class="ambient-btn" data-sound="forest"><i class="fa-solid fa-tree"></i> 森のそよ風</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANEL 3: MASCOT ROOM -->
+      <section id="panel-room" class="app-panel">
+        <div class="glass-card room-card">
+          <h2>パートナーのお部屋</h2>
+          <p class="room-subtitle">ここではパートナーと遊んだり、設定を変更したりできるよ！</p>
+          
+          <div class="mascot-interactive-area">
+            <div class="action-bubble">
+              パートナーをタップすると、なにか喋ってくれるかも！
+            </div>
+            
+            <div class="partner-status">
+              <div class="status-item">
+                <span class="status-label">なかよし度:</span>
+                <div class="progress-bar-bg">
+                  <div id="heart-level-bar" class="progress-bar-fill" style="width: 20%"></div>
+                </div>
+                <span id="heart-level-text" class="status-val">Lv.1</span>
+              </div>
+            </div>
+            
+            <div class="room-action-buttons">
+              <button id="btn-pet-mascot" class="room-btn"><i class="fa-solid fa-hand-holding-heart"></i> なでなでする</button>
+              <button id="btn-feed-mascot" class="room-btn"><i class="fa-solid fa-cookie-bite"></i> おやつをあげる</button>
+              <button id="btn-request-quote" class="room-btn"><i class="fa-solid fa-quote-left"></i> 今日の一言</button>
+            </div>
+          </div>
+
+          <div class="glass-subcard config-card">
+            <h3>システム設定</h3>
+            <div class="setting-toggle-item">
+              <div class="setting-info">
+                <span class="setting-title"><i class="fa-solid fa-bell"></i> スマホのプッシュ通知</span>
+                <span class="setting-desc">バックグラウンドでもリマインドを受信します。</span>
+              </div>
+              <button id="btn-notification-grant" class="setting-action-btn">許可する</button>
+            </div>
+            
+            <div class="setting-toggle-item">
+              <div class="setting-info">
+                <span class="setting-title"><i class="fa-solid fa-mobile-screen-button"></i> 端末バイブレーション</span>
+                <span class="setting-desc">時間になったときにスマホを振動させます。</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="chk-vibrate" checked>
+                <span class="slider round"></span>
+              </label>
+            </div>
+            
+            <div class="setting-toggle-item">
+              <div class="setting-info">
+                <span class="setting-title"><i class="fa-solid fa-heart"></i> ローカルデータの管理</span>
+                <span class="setting-desc">アプリに保存されている予定をクリアします。</span>
+              </div>
+              <button id="btn-clear-data" class="danger-button">全リセット</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FOOTER NAV BAR -->
+    <nav class="app-nav">
+      <button class="nav-item active" data-target="panel-reminders">
+        <i class="fa-solid fa-list-check"></i>
+        <span>リマインド</span>
+      </button>
+      <button class="nav-item" data-target="panel-timer">
+        <i class="fa-solid fa-hourglass-half"></i>
+        <span>集中タイマー</span>
+      </button>
+      <button class="nav-item" data-target="panel-room">
+        <i class="fa-solid fa-house-chimney-user"></i>
+        <span>お部屋</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- ALARM TRIGGER OVERLAY (SLIDES UP ON ALARM) -->
+  <div id="alarm-overlay" class="alarm-overlay">
+    <div class="alarm-content-card glass-card">
+      <div class="alarm-header">
+        <div class="alarm-bell-icon pulse-animation"><i class="fa-solid fa-bell"></i></div>
+        <h3>リマインドの時間だよ！</h3>
+      </div>
+      
+      <!-- Duplicate mascot that triggers happy animation -->
+      <div class="alarm-mascot-container">
+        <!-- Render current active mascot dynamically inside this -->
+        <div id="alarm-mascot-slot"></div>
+      </div>
+      
+      <div id="alarm-reminder-text" class="alarm-text">
+        リマインダー内容がここに入ります。
+      </div>
+      
+      <div class="alarm-buttons">
+        <button id="btn-alarm-complete" class="alarm-btn primary-alarm-btn"><i class="fa-solid fa-check"></i> できた！</button>
+        <button id="btn-alarm-snooze" class="alarm-btn secondary-alarm-btn"><i class="fa-solid fa-hourglass-start"></i> 5分後に教えて</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VOICE INPUT ACTIVE OVERLAY -->
+  <div id="voice-overlay" class="voice-overlay">
+    <div class="voice-card glass-card">
+      <div class="voice-mic-icon pulse-animation"><i class="fa-solid fa-microphone"></i></div>
+      <h3>お話ししてください...</h3>
+      <p class="voice-hint">「明日10時に打ち合わせ」「15分後にコーヒー」など</p>
+      <div id="voice-live-text" class="voice-live-text">聞き取り中...</div>
+      <button id="btn-voice-cancel" class="danger-button">キャンセル</button>
+    </div>
+  </div>
+
+  <!-- SVG Glow gradients defs -->
+  <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
+    <defs>
+      <radialGradient id="lumina-glow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="rgba(234, 220, 247, 0.6)" />
+        <stop offset="100%" stop-color="rgba(234, 220, 247, 0)" />
+      </radialGradient>
+    </defs>
+  </svg>
+
+  <script src="app.js"></script>
+</body>
+</html>
