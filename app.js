@@ -258,38 +258,75 @@ function initAudio() {
   }
 }
 
+// Programmatically generate a 2-second silent 8-bit mono PCM WAV file
+function createSilentWavBlob(durationSeconds = 2) {
+  const sampleRate = 8000;
+  const numChannels = 1;
+  const bitsPerSample = 8;
+  const numSamples = sampleRate * durationSeconds;
+  const dataSize = numSamples * numChannels * (bitsPerSample / 8);
+  const fileSize = 44 + dataSize;
+  
+  const buffer = new ArrayBuffer(fileSize);
+  const view = new DataView(buffer);
+  
+  const writeString = (offset, string) => {
+    for (let i = 0; i < string.length; i++) {
+      view.setUint8(offset + i, string.charCodeAt(i));
+    }
+  };
+  
+  writeString(0, 'RIFF');
+  view.setUint32(4, fileSize - 8, true);
+  writeString(8, 'WAVE');
+  writeString(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * numChannels * (bitsPerSample / 8), true);
+  view.setUint16(32, numChannels * (bitsPerSample / 8), true);
+  view.setUint16(34, bitsPerSample, true);
+  writeString(36, 'data');
+  view.setUint32(40, dataSize, true);
+  
+  for (let i = 0; i < numSamples; i++) {
+    view.setUint8(44 + i, 128); // 128 is silence for 8-bit PCM
+  }
+  
+  return new Blob([buffer], { type: 'audio/wav' });
+}
+
+let silentAudioElement = null;
+
 // Silent Audio Keep-Alive to prevent OS suspending JS execution in background
 function startSilentKeepAlive() {
   if (!state.soundEnabled) return;
   initAudio();
-  if (state.keepAliveNode) return; // already running
   
-  const ctx = state.audioCtx;
-  if (!ctx) return;
+  if (!silentAudioElement) {
+    const blob = createSilentWavBlob(2);
+    const blobUrl = URL.createObjectURL(blob);
+    
+    silentAudioElement = document.createElement('audio');
+    silentAudioElement.src = blobUrl;
+    silentAudioElement.loop = true;
+    silentAudioElement.setAttribute('playsinline', '');
+    silentAudioElement.style.display = 'none';
+    document.body.appendChild(silentAudioElement);
+  }
   
-  // Create an extremely quiet oscillating signal that keeps context alive in the background
-  const osc = ctx.createOscillator();
-  const gainNode = ctx.createGain();
-  
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(1, ctx.currentTime); // 1Hz sub-audible
-  gainNode.gain.setValueAtTime(0.0001, ctx.currentTime); // sub-audible / silent
-  
-  osc.connect(gainNode);
-  gainNode.connect(ctx.destination);
-  
-  osc.start();
-  state.keepAliveNode = osc;
-  console.log("Background keep-alive active.");
+  if (silentAudioElement.paused) {
+    silentAudioElement.play()
+      .then(() => console.log("Silent WAV background keep-alive active."))
+      .catch(err => console.error("Silent WAV playback blocked:", err));
+  }
 }
 
 function stopSilentKeepAlive() {
-  if (state.keepAliveNode) {
-    try {
-      state.keepAliveNode.stop();
-    } catch(e) {}
-    state.keepAliveNode = null;
-    console.log("Background keep-alive disabled.");
+  if (silentAudioElement && !silentAudioElement.paused) {
+    silentAudioElement.pause();
+    console.log("Silent WAV background keep-alive disabled.");
   }
 }
 
